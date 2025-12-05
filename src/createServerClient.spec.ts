@@ -14,7 +14,13 @@ describe("createServerClient", () => {
               return [];
             },
 
-            setAll(cookiesToSet) {
+            setAll(
+              cookiesToSet: {
+                name: string;
+                value: string;
+                options: CookieOptions;
+              }[],
+            ) {
               // no-op
             },
           },
@@ -28,7 +34,13 @@ describe("createServerClient", () => {
               return [];
             },
 
-            setAll(cookiesToSet) {
+            setAll(
+              cookiesToSet: {
+                name: string;
+                value: string;
+                options: CookieOptions;
+              }[],
+            ) {
               // no-op
             },
           },
@@ -63,16 +75,25 @@ describe("createServerClient", () => {
                 return [];
               },
 
-              setAll(cookiesToSet) {
+              setAll(
+                cookiesToSet: {
+                  name: string;
+                  value: string;
+                  options: CookieOptions;
+                }[],
+              ) {
                 setAllCalls += 1;
                 setCookies.push(...cookiesToSet);
               },
             },
 
             global: {
-              fetch: async (a: any, b?: any) => {
+              fetch: (async (
+                a: RequestInfo | URL,
+                b?: RequestInit,
+              ): Promise<Response> => {
                 throw new Error("Should not be called");
-              },
+              }) as typeof fetch,
             },
           },
         );
@@ -127,17 +148,27 @@ describe("createServerClient", () => {
                 ];
               },
 
-              setAll(cookiesToSet) {
+              setAll(
+                cookiesToSet: {
+                  name: string;
+                  value: string;
+                  options: CookieOptions;
+                }[],
+              ) {
                 setAllCalls += 1;
                 setCookies.push(...cookiesToSet);
               },
             },
 
             global: {
-              fetch: async (a: any, b?: any) => {
+              fetch: (async (
+                a: RequestInfo | URL,
+                b?: RequestInit,
+              ): Promise<Response> => {
+                const url = typeof a === "string" ? a : a.toString();
                 if (
-                  a.endsWith("/token?grant_type=pkce") &&
-                  b.method === "POST"
+                  url.endsWith("/token?grant_type=pkce") &&
+                  b?.method === "POST"
                 ) {
                   return new Response(
                     JSON.stringify({
@@ -167,7 +198,7 @@ describe("createServerClient", () => {
                 } else {
                   throw new Error("Bad mock!");
                 }
-              },
+              }) as typeof fetch,
             },
           },
         );
@@ -221,21 +252,28 @@ describe("createServerClient", () => {
                 ];
               },
 
-              setAll(cookiesToSet) {
+              setAll(
+                cookiesToSet: {
+                  name: string;
+                  value: string;
+                  options: CookieOptions;
+                }[],
+              ) {
                 setAllCalls += 1;
                 setCookies.push(...cookiesToSet);
               },
             },
 
             global: {
-              fetch: async (a: any, b?: any) => {
-                if (typeof a !== "string" && typeof b !== "object") {
-                  throw new Error("Bad mock!");
-                }
+              fetch: (async (
+                a: RequestInfo | URL,
+                b?: RequestInit,
+              ): Promise<Response> => {
+                const url = typeof a === "string" ? a : a.toString();
 
                 if (
-                  a.endsWith("/token?grant_type=refresh_token") &&
-                  b.method === "POST"
+                  url.endsWith("/token?grant_type=refresh_token") &&
+                  b?.method === "POST"
                 ) {
                   return new Response(
                     JSON.stringify({
@@ -262,7 +300,7 @@ describe("createServerClient", () => {
                       },
                     },
                   );
-                } else if (a.endsWith("/user") && b.method === "GET") {
+                } else if (url.endsWith("/user") && b?.method === "GET") {
                   return new Response(
                     JSON.stringify({
                       id: "<user-id-user>",
@@ -277,7 +315,7 @@ describe("createServerClient", () => {
                 } else {
                   throw new Error("Bad mock!");
                 }
-              },
+              }) as typeof fetch,
             },
           },
         );
@@ -329,25 +367,32 @@ describe("createServerClient", () => {
                 ];
               },
 
-              setAll(cookiesToSet) {
+              setAll(
+                cookiesToSet: {
+                  name: string;
+                  value: string;
+                  options: CookieOptions;
+                }[],
+              ) {
                 setAllCalls += 1;
               },
             },
 
             global: {
-              fetch: async (a: any, b?: any) => {
-                if (typeof a !== "string" && typeof b !== "object") {
-                  throw new Error("Bad mock!");
-                }
+              fetch: (async (
+                a: RequestInfo | URL,
+                b?: RequestInit,
+              ): Promise<Response> => {
+                const url = typeof a === "string" ? a : a.toString();
 
                 if (
-                  a.endsWith("/token?grant_type=refresh_token") &&
-                  b.method === "POST"
+                  url.endsWith("/token?grant_type=refresh_token") &&
+                  b?.method === "POST"
                 ) {
                   throw new Error(
                     "Refreshing the session should not take place!",
                   );
-                } else if (a.endsWith("/user") && b.method === "GET") {
+                } else if (url.endsWith("/user") && b?.method === "GET") {
                   return new Response(
                     JSON.stringify({
                       id: "<user-id-user>",
@@ -362,7 +407,7 @@ describe("createServerClient", () => {
                 } else {
                   throw new Error("Bad mock!");
                 }
-              },
+              }) as typeof fetch,
             },
           },
         );

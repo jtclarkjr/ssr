@@ -18,11 +18,15 @@ export const serialize = cookie.serialize;
  * Parses the `Cookie` HTTP header into an array of cookie name-value objects.
  *
  * @param header The `Cookie` HTTP header. Decodes cookie names and values from
- * URI encoding first.
+ * URI encoding first. If null, returns an empty array.
  */
 export function parseCookieHeader(
-  header: string,
+  header: string | null,
 ): { name: string; value?: string }[] {
+  if (!header) {
+    return [];
+  }
+
   const parsed = cookie.parse(header);
 
   return Object.keys(parsed ?? {}).map((name) => ({

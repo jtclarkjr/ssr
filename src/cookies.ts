@@ -191,7 +191,7 @@ export function createStorageFromOptions(
               const cookie =
                 allCookies?.find(({ name }) => name === chunkName) || null;
 
-              if (!cookie) {
+              if (!cookie || !cookie.value) {
                 return null;
               }
 
@@ -330,7 +330,7 @@ export function createStorageFromOptions(
             const cookie =
               allCookies?.find(({ name }) => name === chunkName) || null;
 
-            if (!cookie) {
+            if (!cookie || !cookie.value) {
               return null;
             }
 
@@ -465,8 +465,8 @@ export async function applyServerStorage(
 
   // the NextJS cookieStore API can get confused if the `name` from
   // options.cookieOptions leaks
-  delete (removeCookieOptions as any).name;
-  delete (setCookieOptions as any).name;
+  delete (removeCookieOptions as Record<string, unknown>).name;
+  delete (setCookieOptions as Record<string, unknown>).name;
 
   await setAll([
     ...removeCookies.map((name) => ({
