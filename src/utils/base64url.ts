@@ -114,8 +114,6 @@ export function stringFromBase64URL(str: string) {
         queuedBits -= 8;
       }
     } else if (bits === -2) {
-      // ignore spaces, tabs, newlines, =
-      continue;
     } else {
       throw new Error(
         `Invalid Base64-URL character "${str.at(i)}" at position ${i}`,

@@ -1,9 +1,9 @@
 import { describe, expect, test } from "vitest";
 import {
-  stringToBase64URL,
+  codepointToUTF8,
   stringFromBase64URL,
   stringFromUTF8,
-  codepointToUTF8,
+  stringToBase64URL,
 } from "./base64url";
 
 const EXAMPLES = [
@@ -32,7 +32,7 @@ describe("stringFromBase64URL", () => {
     test(`decode "${example}"`, () => {
       expect(
         stringFromBase64URL(
-          "\r\t\n " + Buffer.from(example).toString("base64url"),
+          `\r\t\n ${Buffer.from(example).toString("base64url")}`,
         ),
       ).toEqual(example);
     });
