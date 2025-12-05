@@ -22,7 +22,7 @@ const IGNORE_BASE64URL = " \t\n\r=".split("");
  * used to skip the character, or if -1 used to error out.
  */
 const FROM_BASE64URL = (() => {
-  const charMap: number[] = new Array(128);
+  const charMap: number[] = Array.from({ length: 128 });
 
   for (let i = 0; i < charMap.length; i += 1) {
     charMap[i] = -1;
