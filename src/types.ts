@@ -18,8 +18,8 @@ export type RemoveCookie = (
 ) => Promise<void> | void;
 
 export type GetAllCookies = () =>
-  | Promise<{ name: string; value: string }[] | null>
-  | { name: string; value: string }[]
+  | Promise<{ name: string; value?: string }[] | null>
+  | { name: string; value?: string }[]
   | null;
 
 export type SetAllCookies = (
