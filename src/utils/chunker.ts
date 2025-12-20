@@ -95,7 +95,7 @@ export async function combineChunks(
     return value;
   }
 
-  let values: string[] = [];
+  const values: string[] = [];
 
   for (let i = 0; ; i++) {
     const chunkName = `${key}.${i}`;

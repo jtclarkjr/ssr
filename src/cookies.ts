@@ -1,25 +1,23 @@
 import { parse, serialize } from "cookie";
-
-import {
-  DEFAULT_COOKIE_OPTIONS,
-  combineChunks,
-  createChunks,
-  isBrowser,
-  isChunkLike,
-  stringFromBase64URL,
-  stringToBase64URL,
-} from "./utils";
-
 import type {
-  CookieMethodsServer,
-  CookieMethodsServerDeprecated,
   CookieMethodsBrowser,
   CookieMethodsBrowserDeprecated,
+  CookieMethodsServer,
+  CookieMethodsServerDeprecated,
   CookieOptions,
   CookieOptionsWithName,
   GetAllCookies,
   SetAllCookies,
 } from "./types";
+import {
+  combineChunks,
+  createChunks,
+  DEFAULT_COOKIE_OPTIONS,
+  isBrowser,
+  isChunkLike,
+  stringFromBase64URL,
+  stringToBase64URL,
+} from "./utils";
 
 const BASE64_PREFIX = "base64-";
 

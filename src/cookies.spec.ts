@@ -1,16 +1,14 @@
-import { describe, expect, it, beforeEach, afterEach } from "vitest";
-
-import { isBrowser, DEFAULT_COOKIE_OPTIONS, MAX_CHUNK_SIZE } from "./utils";
-import { CookieOptions } from "./types";
-
-import { createStorageFromOptions, applyServerStorage } from "./cookies";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { applyServerStorage, createStorageFromOptions } from "./cookies";
+import type { CookieOptions } from "./types";
+import { DEFAULT_COOKIE_OPTIONS, isBrowser, MAX_CHUNK_SIZE } from "./utils";
 
 describe("createStorageFromOptions in browser without cookie methods", () => {
   beforeEach(() => {
     const cookies: { [name: string]: { value: string; options: string[] } } =
       {};
 
-    const doc = new Proxy<typeof document>({} as any, {
+    const doc = new Proxy<typeof document>({} as unknown as typeof document, {
       get: (target, prop) => {
         if (prop === "cookie") {
           return Object.keys(cookies)
@@ -18,7 +16,7 @@ describe("createStorageFromOptions in browser without cookie methods", () => {
             .join(";");
         }
 
-        return (target as any)[prop];
+        return (target as unknown as Record<string | symbol, unknown>)[prop];
       },
 
       set: (target, prop, setValue) => {
@@ -36,7 +34,8 @@ describe("createStorageFromOptions in browser without cookie methods", () => {
           return true;
         }
 
-        (target as any)[prop] = setValue;
+        (target as unknown as Record<string | symbol, unknown>)[prop] =
+          setValue;
 
         return true;
       },
@@ -44,14 +43,14 @@ describe("createStorageFromOptions in browser without cookie methods", () => {
 
     globalThis.window = {
       document: doc,
-    } as any;
+    } as unknown as Window & typeof globalThis;
 
-    (globalThis as any).document = doc;
+    (globalThis as Record<string, unknown>).document = doc;
   });
 
   afterEach(() => {
-    delete (globalThis as any).window;
-    delete (globalThis as any).document;
+    delete (globalThis as Record<string, unknown>).window;
+    delete (globalThis as Record<string, unknown>).document;
   });
 
   it("should setup mocks correctly", () => {
@@ -136,19 +135,22 @@ describe("createStorageFromOptions in browser without cookie methods", () => {
 
 describe("createStorageFromOptions for createServerClient", () => {
   describe("storage without setAll or without set / remove cookie methods", () => {
-    let warnings: any[][] = [];
+    let warnings: unknown[][] = [];
 
     beforeEach(() => {
-      (console as any).originalWarn = console.warn;
-      console.warn = (...args: any[]) => {
+      (console as unknown as Record<string, unknown>).originalWarn =
+        console.warn;
+      console.warn = (...args: unknown[]) => {
         warnings.push(args);
       };
     });
 
     afterEach(() => {
       warnings = [];
-      console.warn = (console as any).originalWarn;
-      delete (console as any).originalWarn;
+      console.warn = (console as unknown as Record<string, unknown>)
+        .originalWarn as typeof console.warn;
+      delete (console as unknown as Record<string | symbol, unknown>)
+        .originalWarn;
     });
 
     it("should log a warning when only getAll is configured", async () => {
@@ -504,7 +506,7 @@ describe("createStorageFromOptions for createServerClient", () => {
         {
           cookieEncoding: "raw", // to help test readability
           cookies: {
-            get: async (name: string) => {
+            get: async (_name: string) => {
               return null;
             },
             set: async (name, value) => {

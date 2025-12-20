@@ -1,21 +1,18 @@
 import {
   createClient,
-  SupabaseClient,
-  SupabaseClientOptions,
+  type SupabaseClient,
+  type SupabaseClientOptions,
 } from "@supabase/supabase-js";
-
-import { VERSION } from "./version";
-import { isBrowser } from "./utils";
-
+import { createStorageFromOptions } from "./cookies";
 import type {
   CookieMethodsBrowser,
   CookieMethodsBrowserDeprecated,
   CookieOptionsWithName,
 } from "./types";
+import { isBrowser } from "./utils";
+import { VERSION } from "./version";
 
-import { createStorageFromOptions } from "./cookies";
-
-let cachedBrowserClient: SupabaseClient<any, any, any> | undefined;
+let cachedBrowserClient: SupabaseClient | undefined;
 
 /**
  * Creates a Supabase Client for use in a browser environment.
@@ -35,7 +32,7 @@ let cachedBrowserClient: SupabaseClient<any, any, any> | undefined;
  * @param options Various configuration options.
  */
 export function createBrowserClient<
-  Database = any,
+  Database = never,
   SchemaName extends string &
     keyof Omit<Database, "__InternalSupabase"> = "public" extends keyof Omit<
     Database,
@@ -60,7 +57,7 @@ export function createBrowserClient<
  * version.
  */
 export function createBrowserClient<
-  Database = any,
+  Database = never,
   SchemaName extends string &
     keyof Omit<Database, "__InternalSupabase"> = "public" extends keyof Omit<
     Database,
@@ -80,7 +77,7 @@ export function createBrowserClient<
 ): SupabaseClient<Database, SchemaName>;
 
 export function createBrowserClient<
-  Database = any,
+  Database = never,
   SchemaName extends string &
     keyof Omit<Database, "__InternalSupabase"> = "public" extends keyof Omit<
     Database,
@@ -104,7 +101,7 @@ export function createBrowserClient<
     ((!options || !("isSingleton" in options)) && isBrowser());
 
   if (shouldUseSingleton && cachedBrowserClient) {
-    return cachedBrowserClient;
+    return cachedBrowserClient as SupabaseClient<Database, SchemaName>;
   }
 
   if (!supabaseUrl || !supabaseKey) {
@@ -123,7 +120,9 @@ export function createBrowserClient<
 
   const client = createClient<Database, SchemaName>(supabaseUrl, supabaseKey, {
     // TODO: resolve type error
-    ...(options as any),
+    ...(options as unknown as Parameters<
+      typeof createClient<Database, SchemaName>
+    >[2]),
     global: {
       ...options?.global,
       headers: {
@@ -152,7 +151,7 @@ export function createBrowserClient<
   });
 
   if (shouldUseSingleton) {
-    cachedBrowserClient = client;
+    cachedBrowserClient = client as SupabaseClient;
   }
 
   return client;

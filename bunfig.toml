@@ -1,0 +1,17 @@
+# Bun configuration file
+# https://bun.sh/docs/runtime/configuration
+
+[test]
+# Use coverage from vitest
+coverage = false
+
+[install]
+# Install exact versions by default
+exact = true
+
+# Use bun's faster package resolution
+registry = "https://registry.npmjs.org/"
+
+[install.cache]
+# Cache packages for faster installs
+disable = false

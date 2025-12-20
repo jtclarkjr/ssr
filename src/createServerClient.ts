@@ -1,18 +1,17 @@
 import {
-  AuthChangeEvent,
+  type AuthChangeEvent,
   createClient,
-  SupabaseClient,
-  SupabaseClientOptions,
+  type SupabaseClient,
+  type SupabaseClientOptions,
 } from "@supabase/supabase-js";
-
-import { VERSION } from "./version";
-import { createStorageFromOptions, applyServerStorage } from "./cookies";
+import { applyServerStorage, createStorageFromOptions } from "./cookies";
 import type {
-  CookieOptionsWithName,
   CookieMethodsServer,
   CookieMethodsServerDeprecated,
+  CookieOptionsWithName,
 } from "./types";
 import { memoryLocalStorageAdapter } from "./utils/helpers";
+import { VERSION } from "./version";
 
 /**
  * @deprecated Please specify `getAll` and `setAll` cookie methods instead of
@@ -20,7 +19,7 @@ import { memoryLocalStorageAdapter } from "./utils/helpers";
  * version.
  */
 export function createServerClient<
-  Database = any,
+  Database = never,
   SchemaName extends string &
     keyof Omit<Database, "__InternalSupabase"> = "public" extends keyof Omit<
     Database,
@@ -100,7 +99,7 @@ export function createServerClient<
  * @param options Various configuration options.
  */
 export function createServerClient<
-  Database = any,
+  Database = never,
   SchemaName extends string &
     keyof Omit<Database, "__InternalSupabase"> = "public" extends keyof Omit<
     Database,
@@ -119,7 +118,7 @@ export function createServerClient<
 ): SupabaseClient<Database, SchemaName>;
 
 export function createServerClient<
-  Database = any,
+  Database = never,
   SchemaName extends string &
     keyof Omit<Database, "__InternalSupabase"> = "public" extends keyof Omit<
     Database,
@@ -153,7 +152,9 @@ export function createServerClient<
 
   const client = createClient<Database, SchemaName>(supabaseUrl, supabaseKey, {
     // TODO: resolve type error
-    ...(options as any),
+    ...(options as unknown as Parameters<
+      typeof createClient<Database, SchemaName>
+    >[2]),
     global: {
       ...options?.global,
       headers: {

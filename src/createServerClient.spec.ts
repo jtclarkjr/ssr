@@ -1,8 +1,7 @@
-import { describe, it, expect } from "vitest";
-
-import { MAX_CHUNK_SIZE, stringToBase64URL } from "./utils";
-import { CookieOptions } from "./types";
+import { describe, expect, it } from "vitest";
 import { createServerClient } from "./createServerClient";
+import type { CookieOptions } from "./types";
+import { MAX_CHUNK_SIZE, stringToBase64URL } from "./utils";
 
 describe("createServerClient", () => {
   describe("validation", () => {
@@ -14,13 +13,7 @@ describe("createServerClient", () => {
               return [];
             },
 
-            setAll(
-              cookiesToSet: {
-                name: string;
-                value: string;
-                options: CookieOptions;
-              }[],
-            ) {
+            setAll(_cookiesToSet) {
               // no-op
             },
           },
@@ -34,13 +27,7 @@ describe("createServerClient", () => {
               return [];
             },
 
-            setAll(
-              cookiesToSet: {
-                name: string;
-                value: string;
-                options: CookieOptions;
-              }[],
-            ) {
+            setAll(_cookiesToSet) {
               // no-op
             },
           },
@@ -55,7 +42,7 @@ describe("createServerClient", () => {
     storageKeys.forEach((storageKey) => {
       it(`should set PKCE code verifier correctly (storage key = ${storageKey})`, async () => {
         let setAllCalls = 0;
-        let getAllCalls = 0;
+        let _getAllCalls = 0;
 
         const setCookies: {
           name: string;
@@ -70,7 +57,7 @@ describe("createServerClient", () => {
             ...(storageKey ? { cookieOptions: { name: storageKey } } : null),
             cookies: {
               getAll() {
-                getAllCalls += 1;
+                _getAllCalls += 1;
 
                 return [];
               },
@@ -79,7 +66,7 @@ describe("createServerClient", () => {
                 cookiesToSet: {
                   name: string;
                   value: string;
-                  options: CookieOptions;
+                  options: import("./types").CookieOptions;
                 }[],
               ) {
                 setAllCalls += 1;
@@ -89,8 +76,8 @@ describe("createServerClient", () => {
 
             global: {
               fetch: (async (
-                a: RequestInfo | URL,
-                b?: RequestInit,
+                _a: RequestInfo | URL,
+                _b?: RequestInit,
               ): Promise<Response> => {
                 throw new Error("Should not be called");
               }) as typeof fetch,
@@ -98,10 +85,7 @@ describe("createServerClient", () => {
           },
         );
 
-        const {
-          data: { url },
-          error,
-        } = await supabase.auth.signInWithOAuth({
+        const { error } = await supabase.auth.signInWithOAuth({
           provider: "google",
           options: { skipBrowserRedirect: true },
         });
@@ -121,7 +105,7 @@ describe("createServerClient", () => {
 
       it(`should set exchange PKCE code for session correctly (storage key = ${storageKey})`, async () => {
         let setAllCalls = 0;
-        let getAllCalls = 0;
+        let _getAllCalls = 0;
 
         const setCookies: {
           name: string;
@@ -136,7 +120,7 @@ describe("createServerClient", () => {
             ...(storageKey ? { cookieOptions: { name: storageKey } } : null),
             cookies: {
               getAll() {
-                getAllCalls += 1;
+                _getAllCalls += 1;
 
                 return [
                   {
@@ -152,7 +136,7 @@ describe("createServerClient", () => {
                 cookiesToSet: {
                   name: string;
                   value: string;
-                  options: CookieOptions;
+                  options: import("./types").CookieOptions;
                 }[],
               ) {
                 setAllCalls += 1;
@@ -181,11 +165,10 @@ describe("createServerClient", () => {
                       user: {
                         id: "<user-id-refresh-token>",
                         // to force chunking
-                        email:
-                          Array.from(
-                            { length: MAX_CHUNK_SIZE },
-                            () => "x",
-                          ).join("") + "@example.com",
+                        email: `${Array.from(
+                          { length: MAX_CHUNK_SIZE },
+                          () => "x",
+                        ).join("")}@example.com`,
                       },
                     }),
                     {
@@ -256,7 +239,7 @@ describe("createServerClient", () => {
                 cookiesToSet: {
                   name: string;
                   value: string;
-                  options: CookieOptions;
+                  options: import("./types").CookieOptions;
                 }[],
               ) {
                 setAllCalls += 1;
@@ -269,8 +252,11 @@ describe("createServerClient", () => {
                 a: RequestInfo | URL,
                 b?: RequestInit,
               ): Promise<Response> => {
-                const url = typeof a === "string" ? a : a.toString();
+                if (typeof a !== "string" && typeof b !== "object") {
+                  throw new Error("Bad mock!");
+                }
 
+                const url = typeof a === "string" ? a : a.toString();
                 if (
                   url.endsWith("/token?grant_type=refresh_token") &&
                   b?.method === "POST"
@@ -286,11 +272,10 @@ describe("createServerClient", () => {
                       user: {
                         id: "<user-id-refresh-token>",
                         // to force chunking
-                        email:
-                          Array.from(
-                            { length: MAX_CHUNK_SIZE },
-                            () => "x",
-                          ).join("") + "@example.com",
+                        email: `${Array.from(
+                          { length: MAX_CHUNK_SIZE },
+                          () => "x",
+                        ).join("")}@example.com`,
                       },
                     }),
                     {
@@ -367,13 +352,7 @@ describe("createServerClient", () => {
                 ];
               },
 
-              setAll(
-                cookiesToSet: {
-                  name: string;
-                  value: string;
-                  options: CookieOptions;
-                }[],
-              ) {
+              setAll(_cookiesToSet) {
                 setAllCalls += 1;
               },
             },
@@ -383,8 +362,11 @@ describe("createServerClient", () => {
                 a: RequestInfo | URL,
                 b?: RequestInit,
               ): Promise<Response> => {
-                const url = typeof a === "string" ? a : a.toString();
+                if (typeof a !== "string" && typeof b !== "object") {
+                  throw new Error("Bad mock!");
+                }
 
+                const url = typeof a === "string" ? a : a.toString();
                 if (
                   url.endsWith("/token?grant_type=refresh_token") &&
                   b?.method === "POST"

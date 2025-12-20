@@ -19,7 +19,7 @@ describe("chunker", () => {
   it("should chunk and return two chunks", async () => {
     const chunked = createChunks("my-chunks", CHUNK_STRING, 2000);
     const combined = await combineChunks("my-chunks", (name) => {
-      let chunk = chunked.find((chunk) => {
+      const chunk = chunked.find((chunk) => {
         return chunk.name === name;
       });
       return chunk?.value;
@@ -32,7 +32,7 @@ describe("chunker", () => {
   it("should chunk and return twelve chunks", async () => {
     const chunked = createChunks("my-chunks", CHUNK_STRING, 320);
     const combined = await combineChunks("my-chunks", (name) => {
-      let chunk = chunked.find((chunk) => {
+      const chunk = chunked.find((chunk) => {
         return chunk.name === name;
       });
       return chunk?.value;
@@ -44,7 +44,7 @@ describe("chunker", () => {
   it("should chunk and return one hundred and one chunks", async () => {
     const chunked = createChunks("my-chunks", CHUNK_STRING, 36);
     const combined = await combineChunks("my-chunks", (name) => {
-      let chunk = chunked.find((chunk) => {
+      const chunk = chunked.find((chunk) => {
         return chunk.name === name;
       });
       return chunk?.value;
@@ -57,7 +57,7 @@ describe("chunker", () => {
     const key = "sb-xdbaubpgcisziicojymj-auth-token";
     const chunked = createChunks(key, DOUBLE_CHUNK_STRING);
     const combined = await combineChunks(key, (name) => {
-      let chunk = chunked.find((chunk) => {
+      const chunk = chunked.find((chunk) => {
         return chunk.name === name;
       });
       return chunk?.value;
