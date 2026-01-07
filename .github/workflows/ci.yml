@@ -12,24 +12,20 @@ permissions:
 
 jobs:
   lint:
-    name: Format
+    name: Lint and Format
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Node
-        uses: actions/setup-node@v4
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
 
-      - run: npm ci
+      - run: bun install
 
-      - name: Prettier
+      - name: Biome
         run: |
-          npx prettier --check .
-
-      - name: eslint
-        run: |
-          npx eslint
+          bun run lint
 
   build:
     name: Build and test
@@ -38,15 +34,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Node
-        uses: actions/setup-node@v4
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
 
-      - run: npm ci
+      - run: bun install
 
       - name: Build
         run: |
-          npm run build
+          bun run build
 
       - name: Test
         run: |
-          npm run test
+          bun run test
