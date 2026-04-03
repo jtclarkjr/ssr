@@ -166,13 +166,16 @@ describe("createStorageFromOptions for createServerClient", () => {
         true,
       );
 
-      await setAll([
-        {
-          name: "cookie",
-          value: "value",
-          options: { ...DEFAULT_COOKIE_OPTIONS },
-        },
-      ]);
+      await setAll(
+        [
+          {
+            name: "cookie",
+            value: "value",
+            options: { ...DEFAULT_COOKIE_OPTIONS },
+          },
+        ],
+        {},
+      );
 
       expect(warnings).toEqual([
         [
@@ -194,13 +197,16 @@ describe("createStorageFromOptions for createServerClient", () => {
         true,
       );
 
-      await setAll([
-        {
-          name: "cookie",
-          value: "value",
-          options: { ...DEFAULT_COOKIE_OPTIONS },
-        },
-      ]);
+      await setAll(
+        [
+          {
+            name: "cookie",
+            value: "value",
+            options: { ...DEFAULT_COOKIE_OPTIONS },
+          },
+        ],
+        {},
+      );
 
       expect(warnings).toEqual([
         [
@@ -520,23 +526,26 @@ describe("createStorageFromOptions for createServerClient", () => {
         true,
       );
 
-      await setAll([
-        {
-          name: "a",
-          value: "b",
-          options: { maxAge: 10 },
-        },
-        {
-          name: "b",
-          value: "c",
-          options: { maxAge: 10 },
-        },
-        {
-          name: "c",
-          value: "",
-          options: { maxAge: 0 },
-        },
-      ]);
+      await setAll(
+        [
+          {
+            name: "a",
+            value: "b",
+            options: { maxAge: 10 },
+          },
+          {
+            name: "b",
+            value: "c",
+            options: { maxAge: 10 },
+          },
+          {
+            name: "c",
+            value: "",
+            options: { maxAge: 0 },
+          },
+        ],
+        {},
+      );
 
       expect(setCalls).toEqual([
         { name: "a", value: "b" },
@@ -944,6 +953,7 @@ describe("applyServerStorage", () => {
       value: string;
       options: CookieOptions;
     }[] = [];
+    let setAllHeaders: Record<string, string> = {};
 
     const { storage, getAll, setAll, setItems, removedItems } =
       createStorageFromOptions(
@@ -991,8 +1001,9 @@ describe("applyServerStorage", () => {
               ];
             },
 
-            setAll: async (setCookies) => {
+            setAll: async (setCookies, headers) => {
               setAllCalls.push(...setCookies);
+              setAllHeaders = headers;
             },
           },
         },
@@ -1016,6 +1027,13 @@ describe("applyServerStorage", () => {
         cookieEncoding: "raw", // to help test readability
       },
     );
+
+    expect(setAllHeaders).toEqual({
+      "Cache-Control":
+        "private, no-cache, no-store, must-revalidate, max-age=0",
+      Expires: "0",
+      Pragma: "no-cache",
+    });
 
     expect(setAllCalls).toEqual([
       {

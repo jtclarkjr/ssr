@@ -1,5 +1,27 @@
 # @supabase/ssr
 
+## [0.10.0](https://github.com/supabase/ssr/compare/v0.9.0...v0.10.0) (2026-03-30)
+
+
+### Features
+
+* pass cache headers to setAll to prevent CDN caching of auth responses ([#176](https://github.com/supabase/ssr/issues/176)) ([14962d2](https://github.com/supabase/ssr/commit/14962d2d64483b6fbbfe828099a552029c591d54))
+
+## [0.9.0](https://github.com/supabase/ssr/compare/v0.8.1...v0.9.0) (2026-03-02)
+
+
+### Features
+
+* release workflow RC versioning and publish reliability ([#164](https://github.com/supabase/ssr/issues/164)) ([81e68f4](https://github.com/supabase/ssr/commit/81e68f4f30ae6e905ba92667221c4a7512b91c81))
+
+## [0.8.1](https://github.com/supabase/ssr/compare/v0.8.0...v0.8.1) (2026-03-02)
+
+
+### Bug Fixes
+
+* update README session docs ([#159](https://github.com/supabase/ssr/issues/159)) ([b859905](https://github.com/supabase/ssr/commit/b859905b355e1629f9069ff4bf8837b77f4577ce))
+* use skipAutoInitialize to prevent SSR token refresh race condition ([#131](https://github.com/supabase/ssr/issues/131)) ([0b7be28](https://github.com/supabase/ssr/commit/0b7be2871f470234a5f2d18fd4b71c522696c83d))
+
 ## [0.8.0](https://github.com/supabase/ssr/compare/v0.7.0...v0.8.0) (2025-11-26)
 
 

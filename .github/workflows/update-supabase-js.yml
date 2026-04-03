@@ -1,0 +1,98 @@
+name: Update @supabase/supabase-js
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to update to"
+        required: true
+        type: string
+      source:
+        description: "Source of the update"
+        required: false
+        type: string
+        default: "manual"
+
+permissions:
+  pull-requests: read
+  contents: read
+
+jobs:
+  update-supabase-js:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}-supabase-update-${{ inputs.version }}
+      cancel-in-progress: false
+
+    steps:
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: package-lock.json
+
+      - name: Update @supabase/supabase-js
+        run: |
+          npm pkg set "devDependencies.@supabase/supabase-js=${{ inputs.version }}"
+          npm pkg set "peerDependencies.@supabase/supabase-js=^${{ inputs.version }}"
+          npm install --package-lock-only --ignore-scripts
+
+      - name: Fetch release notes
+        env:
+          VERSION: ${{ inputs.version }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          CURRENT_FULL=$(git show HEAD:package.json | jq -r '.devDependencies["@supabase/supabase-js"] // ""' | grep -oP '[\d]+\.[\d]+\.[\d]+(-[\w.]+)?')
+          CURRENT_BASE=$(echo "$CURRENT_FULL" | grep -oP '[\d]+\.[\d]+\.[\d]+')
+          [[ "$CURRENT_FULL" == *"-"* ]] && INCLUDE_CURRENT=true || INCLUDE_CURRENT=false
+          [[ "$VERSION" == *"-"* ]] && STABLE_ONLY=false || STABLE_ONLY=true
+          RELEASES=$(gh api "repos/supabase/supabase-js/releases?per_page=100")
+          RELEASE_NOTES=$(echo "$RELEASES" | jq -r \
+            --arg current "v${CURRENT_BASE}" \
+            --arg new "v${VERSION}" \
+            --argjson stable_only "$STABLE_ONLY" \
+            --argjson include_current "$INCLUDE_CURRENT" \
+            '[.[] | select(.draft == false) | select(if $stable_only then .prerelease == false else true end)] |
+             (map(.tag_name) | index($new)) as $start |
+             (map(.tag_name) | index($current)) as $end |
+             ($end | if . != null and $include_current then . + 1 else . end) as $end_adj |
+             if $start == null then ["Target version not found in last 100 releases."]
+             elif $end_adj != null and $start >= $end_adj then ["Downgrade — no release notes available."]
+             else [.[$start:$end_adj][] | "## " + .tag_name + "\n\n" + (.body // "No release notes.")]
+             end | .[]')
+          echo "RELEASE_NOTES<<EOF" >> "$GITHUB_ENV"
+          echo "$RELEASE_NOTES" >> "$GITHUB_ENV"
+          echo "EOF" >> "$GITHUB_ENV"
+
+      - name: Generate token
+        id: app-token
+        uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf # v2.2.1
+        with:
+          app-id: ${{ secrets.GH_AUTOFIX_APP_ID }}
+          private-key: ${{ secrets.GH_AUTOFIX_PRIVATE_KEY }}
+
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@c5a7806660adbe173f04e3e038b0ccdcd758773c # v6.1.0
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          commit-message: "chore: update @supabase/supabase-js to v${{ inputs.version }}"
+          title: "chore: update @supabase/supabase-js to v${{ inputs.version }}"
+          body: |
+            This PR updates `@supabase/supabase-js` to v${{ inputs.version }}.
+
+            **Source**: ${{ inputs.source }}
+
+            ---
+
+            ## Release Notes
+
+            ${{ env.RELEASE_NOTES }}
+
+            This PR was created automatically.
+          branch: "gha/auto-update-supabase-js-v${{ inputs.version }}"
+          base: ${{ github.event.repository.default_branch }}

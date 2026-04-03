@@ -261,7 +261,7 @@ export function createStorageFromOptions(
           ];
 
           if (allToSet.length > 0) {
-            await setAll(allToSet);
+            await setAll(allToSet, {});
           }
         },
         removeItem: async (key: string) => {
@@ -288,6 +288,7 @@ export function createStorageFromOptions(
                 value: "",
                 options: removeCookieOptions,
               })),
+              {},
             );
           }
         },
@@ -466,16 +467,24 @@ export async function applyServerStorage(
   delete (removeCookieOptions as Record<string, unknown>).name;
   delete (setCookieOptions as Record<string, unknown>).name;
 
-  await setAll([
-    ...removeCookies.map((name) => ({
-      name,
-      value: "",
-      options: removeCookieOptions,
-    })),
-    ...setCookies.map(({ name, value }) => ({
-      name,
-      value,
-      options: setCookieOptions,
-    })),
-  ]);
+  await setAll(
+    [
+      ...removeCookies.map((name) => ({
+        name,
+        value: "",
+        options: removeCookieOptions,
+      })),
+      ...setCookies.map(({ name, value }) => ({
+        name,
+        value,
+        options: setCookieOptions,
+      })),
+    ],
+    {
+      "Cache-Control":
+        "private, no-cache, no-store, must-revalidate, max-age=0",
+      Expires: "0",
+      Pragma: "no-cache",
+    },
+  );
 }
