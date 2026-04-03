@@ -1,8 +1,6 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 
 import {
-  serialize,
-  parse,
   // intentionally importing ^ to make sure they're exported, remove in v1.0.0
   parseCookieHeader,
   serializeCookieHeader,
